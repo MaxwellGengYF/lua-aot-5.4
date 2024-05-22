@@ -22,7 +22,7 @@
 #include "lopnames.h"
 #include "lstate.h"
 #include "lundump.h"
-
+#include <stdint.h>
 //
 // Command-line arguments and main function
 // ----------------------------------------
@@ -140,8 +140,10 @@ static void doargs(int argc, char **argv)
 static char *get_module_name_from_filename(const char *);
 static void check_module_name(const char *);
 static void replace_dots(char *);
-static void print_functions();
+static void print_functions(Proto*);
 static void print_source_code();
+void compute_md5(uint8_t const *data, size_t data_size, uint8_t *digest);
+void md5_to_string(uint8_t const *digest, char *result);
 
 int main(int argc, char **argv)
 {
@@ -220,30 +222,34 @@ static
 char *get_module_name_from_filename(const char *filename)
 {
     size_t n = strlen(filename);
+    uint8_t digest[16];
+    compute_md5((uint8_t*)filename, n, digest);
+    char *module_name = malloc(33);
+    md5_to_string(digest, module_name);
+    module_name[32] = 0;
+    // int has_extension = 0;
+    // size_t sep = 0;
+    // for (size_t i = 0; i < n; i++) {
+    //     if (filename[i] == '.') {
+    //         has_extension = 1;
+    //         sep = i;
+    //     }
+    // }
 
-    int has_extension = 0;
-    size_t sep = 0;
-    for (size_t i = 0; i < n; i++) {
-        if (filename[i] == '.') {
-            has_extension = 1;
-            sep = i;
-        }
-    }
+    // if (!has_extension || 0 != strcmp(filename + sep, ".c")) {
+    //     fatal_error("output file does not have a \".c\" extension");
+    // }
 
-    if (!has_extension || 0 != strcmp(filename + sep, ".c")) {
-        fatal_error("output file does not have a \".c\" extension");
-    }
-
-    char *module_name = malloc(sep+1);
-    for (size_t i = 0; i < sep; i++) {
-        int c = filename[i];
-        if (c == '/') {
-            module_name[i] = '.';
-        } else {
-            module_name[i] = c;
-        }
-    }
-    module_name[sep] = '\0';
+    // char *module_name = malloc(sep+1);
+    // for (size_t i = 0; i < sep; i++) {
+    //     int c = filename[i];
+    //     if (c == '/') {
+    //         module_name[i] = '.';
+    //     } else {
+    //         module_name[i] = c;
+    //     }
+    // }
+    // module_name[sep] = '\0';
 
     return module_name;
 }
@@ -254,7 +260,7 @@ void check_module_name(const char *module_name)
 {
     for (size_t i = 0; module_name[i] != '\0'; i++) {
         int c = module_name[i];
-        if (!isalnum(c) && c != '_' && c != '.') {
+        if (!isalnum(c) && c != '_' && c != '.' && c != '-' && c != ' ') {
             fatal_error("output module name must contain only letters, numbers, or '.'");
         }
     }
@@ -265,7 +271,7 @@ static
 void replace_dots(char *module_name)
 {
     for (size_t i = 0; module_name[i] != '\0'; i++) {
-        if (module_name[i] == '.') {
+        if (module_name[i] == '.' || module_name[i] == '-' || module_name[i] == ' ') {
             module_name[i] = '_';
         }
     }

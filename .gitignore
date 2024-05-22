@@ -11,3 +11,12 @@ experiments/*.byte
 *.o
 *.so
 .Rproj.user
+
+.vscode
+.xmake
+.cache
+build
+bin
+compile_commands.json
+
+src/template/test.c
