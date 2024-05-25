@@ -19,4 +19,6 @@ build
 bin
 compile_commands.json
 
-src/template/test.c
+src/template/*.lua
+src/template/*.cpp
+src/template/*.c
