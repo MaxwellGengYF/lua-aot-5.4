@@ -38,3 +38,4 @@ int LUAOT_LUAOPEN_NAME(lua_State *L) {
     lua_call(L, 0, 1);
     return 1;
 }
+void load_preload_functions(lua_State *L);

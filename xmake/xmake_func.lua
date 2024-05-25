@@ -148,9 +148,15 @@ on_buildcmd_file(function(target, batchcmds, sourcefile, opt)
     local lib = import('lib')
     local utils = import('utils')
     local sb = lib.StringBuilder()
+    if path.is_absolute(sourcefile) then
+        sourcefile = path.relative(sourcefile, os.projectdir())
+    end
     local file_path = lib.string_replace(sourcefile, '\\', '/')
     local out_file = utils.out_dir(sourcefile)
-    sb:add(path.join(target:targetdir(), "luaot ")):add(file_path):add(' -o '):add(out_file):add(' -e')
+    sb:add(path.join(target:targetdir(), "luaot ")):add(file_path):add(' -o '):add(out_file)
+    if path.basename(sourcefile) == "main" then
+        sb:add(' -e')
+    end
     batchcmds:add_depfiles(sourcefile)
     batchcmds:add_depfiles(out_file)
     batchcmds:vrunv(sb:to_string())
@@ -172,5 +178,12 @@ on_buildcmd_file(function(target, batchcmds, sourcefile, opt)
     batchcmds:set_depmtime(os.mtime(objectfile))
     batchcmds:set_depcache(target:dependfile(objectfile))
     batchcmds:compile(out_file, objectfile)
+    if path.basename(sourcefile) ~= "main" then
+        out_file = out_file .. "pp";
+        objectfile = target:objectfile(out_file)
+        table.insert(target:objectfiles(), objectfile)
+        batchcmds:add_depfiles(out_file)
+        batchcmds:compile(out_file, objectfile)
+    end
 end)
 rule_end()

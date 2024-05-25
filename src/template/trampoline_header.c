@@ -1,7 +1,7 @@
 //
 // Most of what we need is copied verbatim from lvm.c
 //
-
+#define LUAOT_IS_MODULE
 #include "lvm.c"
 
 //
