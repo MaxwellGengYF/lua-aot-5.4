@@ -2,7 +2,7 @@
 // Most of what we need is copied verbatim from lvm.c
 //
 #define LUAOT_IS_MODULE
-#include "lvm.c"
+#include "lvm.cpp"
 
 //
 // Our modified version of vmfetch(). Since instr and index are compile time

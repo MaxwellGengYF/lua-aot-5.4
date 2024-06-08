@@ -5,7 +5,7 @@
 // Get access to static" functions from lvm.c, but be careful to not re-define the
 // functions that are already exported by liblua.a
 #define LUAOT_IS_MODULE 1
-#include "lvm.c"
+#include "lvm.cpp"
 
 //
 // These operations normally use `pc++` to skip metamethod calls in the

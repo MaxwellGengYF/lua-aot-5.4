@@ -166,9 +166,9 @@ int main(int argc, char **argv) {
   }
 
 #if defined(LUAOT_USE_GOTOS)
-  println("#include \"luaot_header.c\"");
+  println("#include \"luaot_header.cpp\"");
 #elif defined(LUAOT_USE_SWITCHES)
-  println("#include \"trampoline_header.c\"");
+  println("#include \"trampoline_header.cpp\"");
 #endif
   printnl();
   print_functions(proto);
@@ -179,10 +179,10 @@ int main(int argc, char **argv) {
   println("#define LUAOT_LUAOPEN_NAME luaopen_%s", module_name);
   printnl();
 #if defined(LUAOT_USE_GOTOS)
-  println("#include \"luaot_footer.c\"");
+  println("#include \"luaot_footer.cpp\"");
 #elif defined(LUAOT_USE_SWITCHES)
 
-  println("#include \"trampoline_footer.c\"");
+  println("#include \"trampoline_footer.cpp\"");
 #endif
   if (executable) {
     printnl();
@@ -208,20 +208,9 @@ int main(int argc, char **argv) {
     println(" return 0;");
     println("}");
   }
-  fclose(output_file);
   if (!executable) {
-    size_t out_size = strlen(output_filename);
-    char *out_cpp = malloc(out_size + 3);
-    memcpy(out_cpp, output_filename, out_size);
-    memcpy(out_cpp + out_size, "pp", 2);
-    out_cpp[out_size + 2] = 0;
-    output_file = fopen(out_cpp, "w");
-    if (output_file == NULL) {
-      fatal_error(strerror(errno));
-    }
-    free(out_cpp);
-    size_t input_size = strlen(input_filename) - 4;
-    char *input_name = malloc(input_size + 1);
+        size_t input_size = strlen(input_filename) - 4;
+    char *input_name = static_cast<char*>(malloc(input_size + 1));
     memcpy(input_name, input_filename, input_size);
     for (char *ptr = input_name; ptr != input_name + input_size; ++ptr) {
       if (*ptr == '\\') {
@@ -230,16 +219,14 @@ int main(int argc, char **argv) {
     }
     input_name[input_size] = 0;
     println("#include \"regist.hpp\"");
-    println("extern \"C\"{");
     println("int luaopen_%s(lua_State *L);", module_name);
-    println("}");
     println("static RegistClass r%s{", module_name);
     println("\"%s\", ", input_name);
     println("luaopen_%s", module_name);
     println("};");
-    fclose(output_file);
     free(input_name);
   }
+  fclose(output_file);
   return 0;
 }
 
@@ -249,7 +236,7 @@ static char *get_module_name_from_filename(const char *filename) {
   size_t n = strlen(filename);
   uint8_t digest[16];
   compute_md5((uint8_t *)filename, n, digest);
-  char *module_name = malloc(33);
+  char *module_name = static_cast<char*>(malloc(33));
   md5_to_string(digest, module_name);
   module_name[32] = 0;
   // int has_extension = 0;
@@ -804,9 +791,9 @@ static void luaot_PrintOpcodeComment(Proto *f, int pc) {
 }
 
 #if defined(LUAOT_USE_GOTOS)
-#include "luaot_gotos.c"
+#include "luaot_gotos.cpp"
 #elif defined(LUAOT_USE_SWITCHES)
-#include "luaot_switches.c"
+#include "luaot_switches.cpp"
 #else
 #error "Must define LUAOT_USE_GOTOS or LUAOT_USE_SWITCHES"
 #endif
