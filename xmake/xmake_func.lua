@@ -180,12 +180,5 @@ on_buildcmd_file(function(target, batchcmds, sourcefile, opt)
     batchcmds:set_depmtime(os.mtime(objectfile))
     batchcmds:set_depcache(target:dependfile(objectfile))
     batchcmds:compile(out_file, objectfile)
-    if path.basename(sourcefile) ~= "main" then
-        out_file = out_file .. "pp";
-        objectfile = target:objectfile(out_file)
-        table.insert(target:objectfiles(), objectfile)
-        batchcmds:add_depfiles(out_file)
-        batchcmds:compile(out_file, objectfile)
-    end
 end)
 rule_end()

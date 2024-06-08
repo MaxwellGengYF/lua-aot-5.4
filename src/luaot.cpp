@@ -216,8 +216,7 @@ int main(int argc, char **argv) {
     println("lua_close(L);");
     println(" return 0;");
     println("}");
-  }
-  if (!executable) {
+  } else {
     size_t input_size = strlen(input_filename) - 4;
     char *input_name = static_cast<char *>(malloc(input_size + 1));
     memcpy(input_name, input_filename, input_size);
@@ -228,10 +227,9 @@ int main(int argc, char **argv) {
     }
     input_name[input_size] = 0;
     println("#include \"regist.hpp\"");
-    println("int luaopen_%s(lua_State *L);", module_name);
     println("static RegistClass r%s{", module_name);
     println("\"%s\", ", input_name);
-    println("luaopen_%s", module_name);
+    println("LUAOT_LUAOPEN_NAME");
     println("};");
     free(input_name);
   }
