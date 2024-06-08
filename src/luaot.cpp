@@ -22,6 +22,7 @@
 #include "lopnames.h"
 #include "lstate.h"
 #include "lundump.h"
+#include <filesystem>
 #include <stdint.h>
 //
 // Command-line arguments and main function
@@ -32,7 +33,8 @@
 
 static const char *program_name = "luaot";
 static char *input_filename = NULL;
-static char *output_filename = NULL;
+static std::string output_filename_str;
+static char const *output_filename = NULL;
 static char *module_name = NULL;
 
 static FILE *output_file = NULL;
@@ -106,7 +108,14 @@ static void doargs(int argc, char **argv) {
         if (i >= argc) {
           fatal_error("missing argument for -o");
         }
-        output_filename = argv[i];
+        std::filesystem::path out_path{argv[i]};
+        auto par = out_path.parent_path();
+        std::error_code ec;
+        if (!std::filesystem::exists(par, ec) && (!ec)) {
+          std::filesystem::create_directories(par, ec);
+        }
+        output_filename_str = out_path.string();
+        output_filename = output_filename_str.c_str();
       } else {
         fprintf(stderr, "unknown option %s\n", arg);
         exit(1);
@@ -209,8 +218,8 @@ int main(int argc, char **argv) {
     println("}");
   }
   if (!executable) {
-        size_t input_size = strlen(input_filename) - 4;
-    char *input_name = static_cast<char*>(malloc(input_size + 1));
+    size_t input_size = strlen(input_filename) - 4;
+    char *input_name = static_cast<char *>(malloc(input_size + 1));
     memcpy(input_name, input_filename, input_size);
     for (char *ptr = input_name; ptr != input_name + input_size; ++ptr) {
       if (*ptr == '\\') {
@@ -236,7 +245,7 @@ static char *get_module_name_from_filename(const char *filename) {
   size_t n = strlen(filename);
   uint8_t digest[16];
   compute_md5((uint8_t *)filename, n, digest);
-  char *module_name = static_cast<char*>(malloc(33));
+  char *module_name = static_cast<char *>(malloc(33));
   md5_to_string(digest, module_name);
   module_name[32] = 0;
   // int has_extension = 0;

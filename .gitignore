@@ -20,5 +20,3 @@ bin
 compile_commands.json
 
 src/template/*.lua
-src/template/*.cpp
-src/template/*.c

@@ -1,5 +1,9 @@
 local lib = import('lib')
 
-function out_dir(file_dir)
-    return file_dir:sub(1, #file_dir - 3) .. "cpp"
+function get_outdir()
+    return "build/.luaot/"
+end
+
+function out_dir(sourcefile)
+    return path.join(get_outdir(), path.directory(sourcefile), path.basename(sourcefile) .. ".cpp")
 end

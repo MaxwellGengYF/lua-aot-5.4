@@ -57,4 +57,5 @@ _config_project({
 add_deps('lua-compiler', 'test_codegen')
 add_files('template/*.lua', "template/regist.cpp")
 add_rules('compile_lua')
+add_includedirs('template')
 target_end()
